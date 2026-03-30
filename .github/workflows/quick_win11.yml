@@ -1,0 +1,26 @@
+name: Win11-Quick-Test
+
+on: workflow_dispatch
+
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+      - name: Setup-CRD
+        run: |
+          $url = "https://dl.google.com/edgedl/chrome-remote-desktop/chromeremotedesktophost.msi"
+          Invoke-WebRequest $url -OutFile "crd.msi"
+          Start-Process msiexec.exe -Wait -ArgumentList "/i crd.msi /qn"
+          
+      - name: Activate
+        run: |
+          # 1. วาง Code ที่ก๊อปมาจาก Google (CRP) ลงในบรรทัดข้างล่างนี้
+          # 2. อย่าลืมพิมพ์ --pin=123456 ต่อท้ายสุดของบรรทัด
+          [วางคำสั่งจาก Google ที่นี่] --pin=123456
+          
+      - name: Finalize
+        run: |
+          net user runneradmin MyPassword123! /add
+          net localgroup administrators runneradmin /add
+          Write-Host "เครื่องพร้อมแล้ว! เชื่อมต่อผ่านเว็บได้เลย"
+          Start-Sleep -Seconds 600  # ตั้งไว้ 10 นาที (600 วินาที) ตามที่ขอครับ
