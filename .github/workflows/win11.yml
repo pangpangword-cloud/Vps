@@ -1,6 +1,11 @@
-name: Windows-11-Auto-Login
+name: Windows-11-Manual-Input
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      auth_code:
+        description: 'วาง Code CRP ใหม่จาก Google ทุกครั้งที่รัน'
+        required: true
 
 jobs:
   build:
@@ -12,18 +17,16 @@ jobs:
           Invoke-WebRequest $url -OutFile "crd.msi"
           Start-Process msiexec.exe -Wait -ArgumentList "/i crd.msi /qn"
           
-      - name: 2. Activate (Using Secret)
+      - name: 2. Activate
         run: |
-          # ระบบจะดึงค่าจาก Secret มาวางตรงนี้ให้เองครับ
-          ${{ secrets.CRP_COMMAND }} --pin=123456
+          # ใช้ช่อง Input เพื่อความสดใหม่ของ Token
+          ${{ github.event.inputs.auth_code }} --pin=123456
           
-      - name: 3. Keep-Alive (10 Minutes)
+      - name: 3. Keep-Alive (10 Mins)
         run: |
-          Write-Host "เครื่องเริ่มทำงานแล้ว! เข้าไปที่หน้า Google Remote Desktop ได้เลย"
           $i = 0
           while ($i -lt 10) {
-            Write-Host "Working... ($i/10 mins)"
-            echo "alive" > ping.txt
+            Write-Host "เครื่องยังทำงานอยู่... ($i/10 นาที)"
             Start-Sleep -Seconds 60
             $i++
           }
