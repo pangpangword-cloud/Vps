@@ -1,26 +1,29 @@
-name: Windows-11-Quick-Input
+name: Windows-11-Auto-Login
 
-on:
-  workflow_dispatch:
-    inputs:
-      auth_code:
-        description: 'วาง Command (CRP) จาก Google ที่นี่'
-        required: true
+on: workflow_dispatch
 
 jobs:
   build:
     runs-on: windows-2022
     steps:
-      - name: Setup-CRD
+      - name: 1. Setup-CRD
         run: |
           $url = "https://dl.google.com/edgedl/chrome-remote-desktop/chromeremotedesktophost.msi"
           Invoke-WebRequest $url -OutFile "crd.msi"
           Start-Process msiexec.exe -Wait -ArgumentList "/i crd.msi /qn"
           
-      - name: Activate
+      - name: 2. Activate (Using Secret)
         run: |
-          # ระบบจะดึงข้อมูลจากช่องที่คุณกรอกมาใส่ตรงนี้อัตโนมัติ
-          ${{ github.event.inputs.auth_code }} --pin=123456
+          # ระบบจะดึงค่าจาก Secret มาวางตรงนี้ให้เองครับ
+          ${{ secrets.CRP_COMMAND }} --pin=123456
           
-      - name: Keep-Alive
-        run: Start-Sleep -Seconds 600
+      - name: 3. Keep-Alive (10 Minutes)
+        run: |
+          Write-Host "เครื่องเริ่มทำงานแล้ว! เข้าไปที่หน้า Google Remote Desktop ได้เลย"
+          $i = 0
+          while ($i -lt 10) {
+            Write-Host "Working... ($i/10 mins)"
+            echo "alive" > ping.txt
+            Start-Sleep -Seconds 60
+            $i++
+          }
